@@ -5,20 +5,18 @@ using System.Data.Entity;
 using System.Web.Mvc;
 using Jqgrid.Models;
 
-
 namespace Jqgrid.Controllers
 {
     public class JqgridController : Controller
     {
-
         public ActionResult Index()
         {
             return View();
         }
-
-        DatabaseEntities1 db = new DatabaseEntities1();
-        public JsonResult GetValues(string sidx, string sord, int page, int rows)  //Gets the todo Lists.
+        //Gets the todo Lists.        
+        public JsonResult GetValues(string sidx, string sord, int page, int rows) 
         {
+            DatabaseEntities1 db = new DatabaseEntities1();
             int pageIndex = Convert.ToInt32(page) - 1;
             int pageSize = rows;
             var Results = db.Users.Select(
@@ -29,19 +27,49 @@ namespace Jqgrid.Controllers
                         a.Phone,
                         a.Address,
                         a.DOB,
-                    });
+                    }).ToList();
             int totalRecords = Results.Count();
             var totalPages = (int)Math.Ceiling((float)totalRecords / (float)rows);
-            if (sord.ToUpper() == "DESC")
+            //sorting
+            try
             {
-                Results = Results.OrderByDescending(s => s.Id);
-                Results = Results.Skip(pageIndex * pageSize).Take(pageSize);
+                switch (sidx)
+                {
+                    case "Name":
+                        if (sord.ToUpper() == "ASC")
+                            Results = Results.OrderBy(x => x.Name).ToList();
+                        else
+                            Results = Results.OrderByDescending(x => x.Name).ToList();
+                        break;
+                    case "Phone":
+                        if (sord.ToUpper() == "ASC")
+                            Results = Results.OrderBy(x => x.Phone).ToList();
+                        else
+                            Results = Results.OrderByDescending(x => x.Phone).ToList();
+                        break;
+                    case "Address":
+                        if (sord.ToUpper() == "ASC")
+                            Results = Results.OrderBy(x => x.Address).ToList();
+                        else
+                            Results = Results.OrderByDescending(x => x.Address).ToList();
+                        break;
+                    case "DOB":
+                        if (sord.ToUpper() == "ASC")
+                            Results = Results.OrderBy(x => x.DOB).ToList();
+                        else
+                            Results = Results.OrderByDescending(x => x.DOB).ToList();
+                        break;
+                    default:
+                        Results = Results.OrderByDescending(s => s.Id).ToList();
+                        break;
+                }
             }
-            else
+            catch(Exception ex)
             {
-                Results = Results.OrderBy(s => s.Id);
-                Results = Results.Skip(pageIndex * pageSize).Take(pageSize);
+                throw ex;
             }
+            //paging                
+            Results = Results.Skip(pageIndex * pageSize).Take(pageSize).ToList();
             var jsonData = new
             {
                 total = totalPages,
@@ -51,59 +79,58 @@ namespace Jqgrid.Controllers
             };
             return Json(jsonData, JsonRequestBehavior.AllowGet);
         }
-
         // TODO:insert a new row to the grid logic here
-        [HttpPost]
-        public string Create([Bind(Exclude = "Id")] User obj)
-        {
-            string msg;
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    db.Users.Add(obj);
-                    db.SaveChanges();
-                    msg = "Saved Successfully";
-                }
-                else
-                {
-                    msg = "Validation data not successfull";
-                }
-            }
-            catch (Exception ex)
-            {
-                msg = "Error occured:" + ex.Message;
-            }
-            return msg;
-        }
-        public string Edit(User obj)
-        {
-            string msg;
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    db.Entry(obj).State = EntityState.Modified;
-                    db.SaveChanges();
-                    msg = "Saved Successfully";
-                }
-                else
-                {
-                    msg = "Validation data not successfull";
-                }
-            }
-            catch (Exception ex)
-            {
-                msg = "Error occured:" + ex.Message;
-            }
-            return msg;
-        }
-        public string Delete(int Id)
-        {
-            User list = db.Users.Find(Id);
-            db.Users.Remove(list);
-            db.SaveChanges();
-            return "Deleted successfully";
-        }
+        //[HttpPost]
+        //public string Create([Bind(Exclude = "Id")] User obj)
+        //{
+        //    string msg;
+        //    try
+        //    {
+        //        if (ModelState.IsValid)
+        //        {
+        //            db.Users.Add(obj);
+        //            db.SaveChanges();
+        //            msg = "Saved Successfully";
+        //        }
+        //        else
+        //        {
+        //            msg = "Validation data not successfull";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        msg = "Error occured:" + ex.Message;
+        //    }
+        //    return msg;
+        //}
+        //public string Edit(User obj)
+        //{
+        //    string msg;
+        //    try
+        //    {
+        //        if (ModelState.IsValid)
+        //        {
+        //            db.Entry(obj).State = EntityState.Modified;
+        //            db.SaveChanges();
+        //            msg = "Saved Successfully";
+        //        }
+        //        else
+        //        {
+        //            msg = "Validation data not successfull";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        msg = "Error occured:" + ex.Message;
+        //    }
+        //    return msg;
+        //}
+        //public string Delete(int Id)
+        //{
+        //    User list = db.Users.Find(Id);
+        //    db.Users.Remove(list);
+        //    db.SaveChanges();
+        //    return "Deleted successfully";
+        //}
     }
 }
