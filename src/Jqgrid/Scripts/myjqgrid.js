@@ -33,7 +33,16 @@
             repeatitems: false,
             Id: "0"
         },
-        multiselect: false
+        multiselect: false,
+        //loadComplete: function () {
+        //    var $this = $(this);
+        //    if ($this.jqGrid("getGridParam", "datatype") !== "local") {
+        //        setTimeout(function () {
+        //            $this.jqGrid("setGridParam", { rowNum: 10 }); // the real value
+        //            $this.trigger("reloadGrid");
+        //        }, 50);
+        //    }
+        //},
         //pager-you have to choose here what icons should appear at the bottom
         //like edit,create,delete icons
     }).navGrid('#pager', { edit: true, add: true, del: true, search: false, refresh: true },
